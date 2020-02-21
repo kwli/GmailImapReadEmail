@@ -18,7 +18,8 @@ namespace GmailReadImapEmail
             { JobType.REMINDER, SearchQuery.FromContains("info@developerdays.pl").Or(SearchQuery.FromContains("info@join-conference.com"))
                 .And(SearchQuery.SubjectContains("Payment deadline approaching").Or(SearchQuery.SubjectContains("Zbliżający się termin płatności")))
                 .And(SearchQuery.BodyContains("you registered for").Or(SearchQuery.BodyContains("przeprowadziłeś rejestrację na"))) },
-            { JobType.MAIL_DELIVERY_SUBSYSTEM, SearchQuery.SubjectContains("Delivery Status Notification") },
+            //{ JobType.MAIL_DELIVERY_SUBSYSTEM, SearchQuery.SubjectContains("Delivery Status Notification") },
+            { JobType.MAIL_DELIVERY_SUBSYSTEM, SearchQuery.DeliveredAfter(new DateTime(2020, 2, 18)).And(SearchQuery.BodyContains("Wiadomość nie została dostarczona").Or(SearchQuery.BodyContains("couldn't be delivered"))) },
             { JobType.SESSION_EVALUATION, SearchQuery.SubjectContains("Evaluation of your session") },
             { JobType.TICKET_FUCKUP, SearchQuery.DeliveredAfter(new DateTime(2019, 5, 23)).And(SearchQuery.BodyContains("You can find the ticket for Cloud DeveloperDays 2019 attached.").Or(SearchQuery.BodyContains("W załączeniu znajdziesz bilety na Cloud DeveloperDays 2019."))) }
         };
@@ -74,8 +75,9 @@ namespace GmailReadImapEmail
                 }
                 client.Disconnect(true);
             }
-            
-            return DbProvider.Synchronize(derivativesList);
+
+            //return DbProvider.Synchronize(derivativesList);
+            return DbProvider.ProduceUpdatesList(derivativesList);
         }
 
         private IEmailDerivative ProduceEmailDerivative(MimeMessage message, JobType jobType)
